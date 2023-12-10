@@ -49,8 +49,8 @@ class TestGetOccuranceRateArray(unittest.TestCase):
     def test(self):
         testdata = get_test_df()
         expected = np.array([1.0, 0.4, 0.4, 0.2])
-        output = yado_vectorization.get_occurance_rate_array(testdata)
-        self.assertTrue(np.isclose(expected, output))
+        output = yado_vectorization.get_occurance_rate_array(testdata, 4)
+        self.assertTrue(np.isclose(expected, output).all())
 
 
 class TestGetCoOccuranceRateArray(unittest.TestCase):
@@ -59,13 +59,13 @@ class TestGetCoOccuranceRateArray(unittest.TestCase):
     def test(self):
         testdata = get_test_df()
         expected = np.array([
-            [0,2, 0.4, 0.4, 0.2],
+            [0.2, 0.4, 0.4, 0.2],
             [1.0, 0.0, 0.5, 0.5],
             [1.0, 0.5, 0.0, 0.5],
             [1.0, 1.0, 1.0, 0.0]
         ])
-        output = yado_vectorization.get_cooccurance_rate_array(testdata)
-        self.assertTrue(np.isclose(expected, output))
+        output = yado_vectorization.get_cooccurance_rate_array(testdata, 4)
+        self.assertTrue(np.isclose(expected, output).all(), output)
 
 
 class TestGetContinuousOccuranceRateArray(unittest.TestCase):
@@ -74,13 +74,13 @@ class TestGetContinuousOccuranceRateArray(unittest.TestCase):
     def test(self):
         testdata = get_test_df()
         expected = np.array([
-            [0,0, 0.0, 1/6, 0.0],
+            [0.0, 0.0, 1/6, 0.0],
             [0.5, 0.0, 0.5, 0.0],
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 1.0, 0.0, 0.0]
         ])
         output = yado_vectorization.get_continuous_occurance_rate_array(testdata)
-        self.assertTrue(np.isclose(expected, output))
+        self.assertTrue(np.isclose(expected, output).all())
 
 
 if __name__ == "__main__":
