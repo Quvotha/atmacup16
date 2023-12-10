@@ -98,3 +98,68 @@ def get_cooccurance_rate_array(df: pd.DataFrame, num_yado: int = 13806, n_jobs: 
     for (no1, no2, rate) in results:
         co_occurance_matrix[no1 - 1][no2 - 1] = rate
     return co_occurance_matrix
+
+
+def get_continuous_occurance_rate_array(df: pd.DataFrame, num_yado: int = 13806, n_jobs: int = -1, default: float = 0.) -> np.ndarray:
+    """宿番号 no1 が閲覧された直後に閲覧される宿番号が no2 である割合を計算する。
+
+    あるセッションにおいて最後に閲覧された宿番号が no1 の場合、割合計算の対象外とする。
+    
+    Parameters
+    ----------
+    `get_cooccurance_rate_array` と同じ。
+
+
+    Returns
+    -------
+    np.ndarray
+        宿 no1 が閲覧された次に閲覧された宿が no2 である割合。
+        宿番号 - 1 が対応するインデックスになる。
+    """
+    # ログの各行に直後に見た宿の情報を付与、セッションの最後のログ名は次の宿はあり得ない番号
+    no_next_log = -1
+    df = df.sort_values(["session_id", "seq_no"])  # 入力されたデータフレームを変更しない
+    df["yad_no_next"] = df.groupby("session_id")["yad_no"].shift(-1, fill_value=no_next_log)
+
+
+    def continuous_occurance_of(no1: int, no2: int) -> Tuple[int, int, float]:
+        """宿番号 `no1` の閲覧ログに占める、直後に `no2` が閲覧された回数の割合を計算する。
+
+        `no1` が10回閲覧されたとしてその直後に閲覧された宿が `no2` であった回数が4なら0.4になる。        
+
+        Parameters
+        ----------
+        no1, no2: int
+            宿番号。
+
+        Returns
+        -------
+        (no1, no2, rate) : Tuple[int, int, float]
+            宿番号と割合。
+        """
+        if no1 == no2:
+            return (no1, no2, 0.)
+        else:
+            # no1 がセッションの最後に閲覧された宿ならばそのログは計算から除外する
+            mask = (df["yad_no"] == no1) & (df["yad_no_next"] == no_next_log)  # True: 除外する
+            df_ = df.loc[~mask, :]
+            total_occurances = (df_["yad_no"] == no1).sum()
+            if total_occurances < 1:
+                rate = default
+            else:
+                continuous_occurances = ((df_["yad_no"] == no1) & (df_["yad_no_next"] == no2)).sum()
+                rate = 1.0 * continuous_occurances / total_occurances
+            return (no1, no2, rate)
+
+
+    def gen_pairs() -> Generator[Tuple[int, int], None, None]:
+        for no1 in range(1, 1 + num_yado):
+            for no2 in range(1, 1 + num_yado):
+                yield no1, no2
+
+
+    results = Parallel(n_jobs=n_jobs)(delayed(continuous_occurance_of)(pair[0], pair[1]) for pair in gen_pairs())
+    continuous_occurance_matrix = np.zeros((num_yado, num_yado))
+    for (no1, no2, rate) in results:
+        continuous_occurance_matrix[no1 - 1][no2 - 1] = rate
+    return continuous_occurance_matrix
