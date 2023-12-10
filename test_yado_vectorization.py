@@ -1,5 +1,6 @@
 import unittest
 
+import numpy as np
 import pandas as pd
 
 import yado_vectorization
@@ -8,6 +9,10 @@ import yado_vectorization
 def get_test_df() -> pd.DataFrame:
 
     # セッション数5, 宿の種類4
+    # 宿1: 5つのセッションに登場
+    # 宿2: 2つのセッションに登場
+    # 宿3: 2つのセッションに登場
+    # 宿4: 1つのセッションに登場
     session_1 = pd.DataFrame()
     session_1["yad_no"] = [1, 3, 1]
     session_1["seq_no"] = list(range(session_1.shape[0]))
@@ -19,7 +24,7 @@ def get_test_df() -> pd.DataFrame:
     session_2["session_id"] = "session2session2session2session2"
 
     session_3 = pd.DataFrame()
-    session_3["yad_no"] = [4]
+    session_3["yad_no"] = [1]
     session_3["seq_no"] = list(range(session_3.shape[0]))
     session_3["session_id"] = "session3session3session3session3"
 
@@ -39,16 +44,44 @@ def get_test_df() -> pd.DataFrame:
 
 
 class TestGetOccuranceRateArray(unittest.TestCase):
-    pass
+
+
+    def test(self):
+        testdata = get_test_df()
+        expected = np.array([1.0, 0.4, 0.4, 0.2])
+        output = yado_vectorization.get_occurance_rate_array(testdata)
+        self.assertTrue(np.isclose(expected, output))
 
 
 class TestGetCoOccuranceRateArray(unittest.TestCase):
-    pass
+
+
+    def test(self):
+        testdata = get_test_df()
+        expected = np.array([
+            [0,2, 0.4, 0.4, 0.2],
+            [1.0, 0.0, 0.5, 0.5],
+            [1.0, 0.5, 0.0, 0.5],
+            [1.0, 1.0, 1.0, 0.0]
+        ])
+        output = yado_vectorization.get_cooccurance_rate_array(testdata)
+        self.assertTrue(np.isclose(expected, output))
 
 
 class TestGetContinuousOccuranceRateArray(unittest.TestCase):
-    pass
+
+
+    def test(self):
+        testdata = get_test_df()
+        expected = np.array([
+            [0,0, 0.0, 1/6, 0.0],
+            [0.5, 0.0, 0.5, 0.0],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0]
+        ])
+        output = yado_vectorization.get_continuous_occurance_rate_array(testdata)
+        self.assertTrue(np.isclose(expected, output))
 
 
 if __name__ == "__main__":
-    print(get_test_df())
+    unittest.main()
