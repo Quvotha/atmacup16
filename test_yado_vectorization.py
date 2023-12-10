@@ -74,12 +74,12 @@ class TestGetContinuousOccuranceRateArray(unittest.TestCase):
     def test(self):
         testdata = get_test_df()
         expected = np.array([
-            [0.0, 0.0, 1/6, 0.0],
+            [0.0, 0.0, 1., 0.0],
             [0.5, 0.0, 0.5, 0.0],
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 1.0, 0.0, 0.0]
         ])
-        output = yado_vectorization.get_continuous_occurance_rate_array(testdata)
+        output = yado_vectorization.get_continuous_occurance_rate_array(testdata, 4)
         self.assertTrue(np.isclose(expected, output).all())
 
 
