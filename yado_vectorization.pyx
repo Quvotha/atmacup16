@@ -11,13 +11,10 @@ from joblib import delayed, Parallel
 import numpy as np
 import pandas as pd
 
-# from cython.parallel import prange
 cimport numpy as cnp
 
 DIR = os.path.join(os.path.expanduser("~"), "atmacup16")
 if DIR not in sys.path: sys.path.append(DIR)
-
-# import vectorization
 
 
 def get_occurance_rate_array(df: pd.DataFrame, num_yado: int = 13806) -> np.ndarray:
@@ -111,7 +108,7 @@ cpdef cnp.ndarray[cnp.float64_t, ndim=2] get_cooccurance_rate_array(
     return co_occurance_matrix
 
 
-def get_continuous_occurance_rate_array(df: pd.DataFrame, num_yado: int = 13806, n_jobs: int = -1, default: float = 0.) -> np.ndarray:
+def get_continuous_occurance_rate_array(df: pd.DataFrame, num_yado: int = 13806) -> np.ndarray:
     """宿番号 no1 が閲覧された直後に閲覧される宿番号が no2 である割合を計算する。
 
     あるセッションにおいて最後に閲覧された宿番号が no1 の場合、割合計算の対象外とする。
