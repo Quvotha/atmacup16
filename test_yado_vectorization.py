@@ -80,7 +80,7 @@ class TestGetContinuousOccuranceRateArray(unittest.TestCase):
             [0.0, 1.0, 0.0, 0.0]
         ])
         output = yado_vectorization.get_continuous_occurance_rate_array(testdata, 4)
-        self.assertTrue(np.isclose(expected, output).all())
+        self.assertTrue(np.isclose(expected, output).all(), output)
 
 
 if __name__ == "__main__":
